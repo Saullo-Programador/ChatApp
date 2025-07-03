@@ -7,9 +7,13 @@ import 'package:flutter_app/service/chat/chat_service.dart';
 
 class ChatPage extends StatelessWidget {
   final String receiverEmail;
-  final String receiveID;
+  final String receiverID;
 
-  ChatPage({super.key, required this.receiverEmail, required this.receiveID});
+  ChatPage({
+    super.key, 
+    required this.receiverEmail, 
+    required this.receiverID
+  });
 
   final TextEditingController _messageController = TextEditingController();
 
@@ -18,7 +22,7 @@ class ChatPage extends StatelessWidget {
 
   void sendMessage() async {
     if (_messageController.text.isNotEmpty) {
-      await _chatService.sendMessage(receiveID, _messageController.text);
+      await _chatService.sendMessage(receiverID, _messageController.text);
 
       _messageController.clear();
     }
@@ -27,7 +31,7 @@ class ChatPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -47,7 +51,7 @@ class ChatPage extends StatelessWidget {
   Widget _buildMessageList(){
     String senderID = _authService.getCurrentUser()!.uid;
     return StreamBuilder(
-      stream: _chatService.getMessages(receiveID, senderID),
+      stream: _chatService.getMessages(receiverID, senderID),
       builder: (context, snapshot) {
         if(snapshot.hasError) {
           return const Text("Error");
@@ -67,23 +71,19 @@ class ChatPage extends StatelessWidget {
   Widget _buildMessageItem( DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
-    bool isCurrentUserMessage = data['senderID'] == _authService.getCurrentUser()!.uid;
+    bool isCurrentUser = data['senderID'] == _authService.getCurrentUser()!.uid;
 
-    var alignment = isCurrentUserMessage ? Alignment.centerLeft : Alignment.centerRight;
-    var crossAxisAlignment = isCurrentUserMessage ? CrossAxisAlignment.start : CrossAxisAlignment.end;
-
+    var aligment = isCurrentUser ? Alignment.centerRight : Alignment.centerLeft;
 
     return Container(
-      alignment: alignment,
+      alignment: aligment,
       child: Column(
-        crossAxisAlignment: crossAxisAlignment,
+        crossAxisAlignment: 
+          isCurrentUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
-          ChatBubble(
-            message: data["message"], 
-            isCurrentUserMessage: isCurrentUserMessage
-          )
+          ChatBubble(message: data["message"], isCurrentUser: isCurrentUser)
         ],
-      ),
+      )
     );
   }
 
@@ -100,7 +100,7 @@ class ChatPage extends StatelessWidget {
             ),
           ),
           Container(
-            decoration: BoxDecoration(
+            decoration:  const BoxDecoration(
               color: Colors.purple,
               shape: BoxShape.circle,
             ),
